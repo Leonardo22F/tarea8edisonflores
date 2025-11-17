@@ -95,4 +95,4 @@ El "package" en este proyecto es la imagen Docker, que encapsula la aplicación 
 La aplicación está desplegada en: https://edisonflores.onrender.com/
 
 ## Repositorio
-[Enlace al repositorio en GitHub](https://github.com/tu-usuario/tu-repositorio) (actualizar con el enlace real después de crear el repo).
+[Enlace al repositorio en GitHub](https://github.com/Leonardo22F/tarea8edisonflores)
