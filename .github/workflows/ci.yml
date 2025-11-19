@@ -18,7 +18,7 @@ jobs:
   # 🏗️ BUILD & PUSH IMAGE
   build:
     runs-on: ubuntu-latest
-    environment: production   # <<--- AQUÍ SE ACTIVA TU ENVIRONMENT
+    environment: secret  # <<--- AQUÍ SE ACTIVA TU ENVIRONMENT
 
     steps:
     - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment: production   # <<--- Y AQUÍ TAMBIÉN
+    environment: secret   # <<--- Y AQUÍ TAMBIÉN
 
     steps:
     - uses: actions/checkout@v4
