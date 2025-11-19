@@ -1,18 +1,72 @@
-name: Deploy Pro
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
+
+  # ---------- 🧪 JOB 1: TESTS ----------
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest
+
+
+  # ---------- 🏗️ JOB 2: BUILD DOCKER ----------
+  build:
+    runs-on: ubuntu-latest
+    needs: test   # Solo corre si los tests pasan
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker login GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build & Push Docker image
+        run: |
+          IMAGE_ID=${{ secrets.IMAGE_NAME }}
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[:upper:]' '[:lower:]')
+
+          echo "🛠️ Build Docker image: $IMAGE_ID:latest"
+          docker build -t $IMAGE_ID:latest .
+
+          echo "📤 Push Docker image"
+          docker push $IMAGE_ID:latest
+
+
+  # ---------- 🚀 JOB 3: DEPLOY ----------
   deploy:
     runs-on: ubuntu-latest
-    environment: secret
+    needs: build   # Solo corre si la imagen se construye bien
+    environment: production
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      # --- Copiar stack.yml al VPS ---
       - name: Copiar stack.yml al servidor
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -23,6 +77,7 @@ jobs:
           source: "stack.yml"
           target: "/home/${{ secrets.VPS_USER }}/deploy/"
 
+      # --- Deploy remoto ---
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
