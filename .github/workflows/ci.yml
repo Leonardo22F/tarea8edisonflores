@@ -18,6 +18,7 @@ jobs:
   # 🏗️ BUILD & PUSH IMAGE
   build:
     runs-on: ubuntu-latest
+    environment: production   # <= CAMBIA ESTE NOMBRE AL DE TU ENVIRONMENT
 
     steps:
     - uses: actions/checkout@v4
@@ -32,7 +33,6 @@ jobs:
     - name: 🏗️ Build and Push Docker Image
       run: |
         IMAGE_ID=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
-
         docker build -t $IMAGE_ID:latest .
         docker push $IMAGE_ID:latest
 
@@ -40,11 +40,12 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    environment: production   # <= CAMBIA ESTE NOMBRE TAMBIÉN
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: 📂 Upload stack.yml to VPS
+    - name: 📂 Copiar stack.yml al VPS (SCP)
       uses: appleboy/scp-action@v1
       with:
         host: ${{ secrets.VPS_HOST }}
